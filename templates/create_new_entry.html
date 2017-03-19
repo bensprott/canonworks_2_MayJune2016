@@ -18,27 +18,16 @@
                     <form method="post" role="form">
                         {{ form.hidden_tag() }}
                         {{ wtf.form_errors(form, hiddens="only") }}
-                        {{ wtf.form_field(form.title) }}
-                          <script>
-                                CKEDITOR.replace( 'title' );
-                            </script>
-                        {{ wtf.form_field(form.text) }}
-                          <script>
+                        {{ wtf.form_field(form.title) }}						
+                        {{ form.text(only_input = True)}}
+                        <script>
                                 CKEDITOR.replace( 'text' );
-                            </script>
+                        </script>						
                         {{ wtf.form_field(form.tags) }}
-                          <script>
-                                CKEDITOR.replace( 'tags' );
-                            </script>
+						{{ form.text(only_preview = True) }}
                         {{ form.srcLibEntries }}
                         {{ wtf.form_field(form.submit) }}
                     </form>
-{#                    <div class="panel-footer share-buttons">#}
-{#                      <a href="#"><i class="fa fa-map-marker"></i></a>#}
-{#                      <a href="#"><i class="fa fa-photo"></i></a>#}
-{#                      <a href="#"><i class="fa fa-video-camera"></i></a>#}
-{#                    </div>#}
-
         <div id="">
             <div class="v-spacer2"></div>
             <div id="savedLibArticles">

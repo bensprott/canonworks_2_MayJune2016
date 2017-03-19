@@ -31,21 +31,10 @@
                         </div>
                     </div>
                     {% if current_user.is_authenticated %}  
-                        <div class="stnt pull-left">                            
-                            <form action="{{url_for('create_entry')}}" method="post" class="form">
-                                <button class="btn btn-primary top-sixteen margin-right-ten">Start New Topic</button>
-                            </form>
-
-                        </div>
-                        <ul class="nav navbar-nav ">
-                          <li class="active"><a href="index.html"><i class="fa fa-fw icon-ship-wheel"></i> Timeline</a></li>
-                          <li><a href="user-public-profile.html"><i class="fa fa-fw icon-user-1"></i> About</a></li>
-                          <li><a href="user-public-users.html"><i class="fa fa-fw fa-users"></i> Communities</a></li>
-                        </ul>                   
-                        
-                        <ul class="nav navbar-nav hidden-xs navbar-right ">
-                          <li><a href="#" data-toggle="chat-box">Chat <i class="fa fa-fw fa-comment-o"></i></a></li>
-                        </ul>
+                        <div class="stnt pull-left">
+							</p>
+							<h2><a href = "{{url_for('create_entry')}}">Start New Topic</a></h2>
+                        </div>                        
                     {% endif %}                    
                   </div>
 
