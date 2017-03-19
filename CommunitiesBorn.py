@@ -1778,8 +1778,8 @@ def sendPM_PermissionsAreMet(recipient) :
         we need to check that the permissions are met.  For instance,
         if a sender has banned a participant, this function returns False.
     '''   
-    if (usersInCommunityTogether(recipient) or current_user.is_moderator or current_user.is_administrator) : 
-        return current_user.canPM_Recipient(recipient)
+    if (usersInCommunityTogether(recipient) or current_user.is_moderator() or current_user.is_administrator()) : 
+		return current_user.canPM_Recipient(recipient)
     return False
 
 @app.route('/send_private_message/', methods = ['GET', 'POST'])
@@ -2069,10 +2069,9 @@ def send_private_message_from_user_page(userID):
     recipientID = userID
     recipient = User.query.filter_by(id = recipientID).first()
     if sendPM_PermissionsAreMet(User.query.filter_by(id = recipientID).first()) :
-        #return render_template("send_private_message.html", recipientID = recipientID, recipientName = recipient.user_name)
         return redirect(url_for('compose_send_private_message', recipientID = recipientID))
     else :
-        flash("You don't have permissions to message that user!")
+        flash("You don't have permissions to message that user!  You are not in the same communities!")
         return redirect("messaging_center")
     
 
