@@ -3,13 +3,24 @@
   {% if current_user.is_authenticated %}
   	<h2>Your Responses : </h2>    
     <br>
-    {% for resp in responses %}
-        <li><h2><a href="{{url_for('response_page', src_out = resp.srcOutID)}}" >{{ resp.out_title }}</a></h2>            
-            <br>Your Entry Title : {{resp.src_title}}
-            <br>Tags : {{resp.tags}}
-            <br>User who responded : {{resp.responder}}
-            <br>Date confirmed : {{resp.date}}
-        <p>
+    {% for entry in responses %}           
+        <div class="panel panel-default">                        
+            <div class="panel-body">
+                <div class="media media-clearfix-xs-min">
+                    <div class="media-body">
+                        <h3 class="media-heading h4"><a href="{{ url_for('write_response', id=entry.id) }}">{{ entry.title }}</a></h3>
+                        <p class="small text-muted">
+                            <!-- <i class="fa fa-clock-o fa-fw"></i> time since post -->
+                            <i class="fa fa-user fa-fw"></i> <a href="{{ url_for('public_user_page', userID=entry.userID) }}">{{entry.user_name}}</a>
+                            <i class="fa fa-calendar fa-fw"></i> {{entry.date_posted}}                                
+                        </p>
+                        {% for tag in entry.tagList %}
+                            <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
   	{% else %}
     	<li><em>You have no responses.</em>
   	{% endfor %}

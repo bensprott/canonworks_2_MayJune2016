@@ -63,6 +63,19 @@ $(function(){
 
 
 
+/*
+    Intercepts private message button clicks and adds the saved library 
+    articles.   
+*/
+$(function(){        
+    $('#new_private_message').bind('click', function(e) {     
+        x = getSavedAndClickedAsString();
+        document.getElementById("srcLibArticles").value =  x + origID; <!--libArStr; -->
+        return true
+    });
+});
+
+
 
 
 function getLibArticlesSetHiddenInput(){
@@ -145,62 +158,21 @@ $(function() {
                     savedLibNode[0].appendChild(savedLibEl);                        
                     savedLibNode[0].appendChild(document.createElement("br"));
                 }
-                
             }
             var node = $('#libArticlesList');
             node.empty();     
             for(var i = 0 ; i < data.libArticles.length; i++){
-
-                // alert(JSON.stringify(data.libArticles[i]));
-
                 tags = '';
                 tagArray = data.libArticles[i].tags.split(" ");
                 for(var j = 0; j < tagArray.length; j++){
                     tags += '<span class="label label-default margin-right-five">' + tagArray[j] + '</span>';
                 }
-
-
                 entryHTML = '<div class="panel panel-default"><div class="panel-body"><div class="media media-clearfix-xs-min">' +
                     '<div class="media-body"><input type="checkbox" class="selectLibArticle" name="libArticle" value=' + data.libArticles[i].id +  '>' +
                     '<h3 class="media-heading h4"><a href=/write_response/' + data.libArticles[i].id + '>'+ data.libArticles[i].title +'</a></h3>' +
                     '<p class="small text-muted"><i class="fa fa-user fa-fw"></i> <a href=/public_user_page/'+ data.libArticles[i].user_id + '>' + data.libArticles[i].user_name +'</a> ' +
                     '<i class="fa fa-calendar fa-fw"></i>' + data.libArticles[i].timestamp + ' </p>' + tags;
-
                 $("#libArticlesList").append(entryHTML);
-
-
-
-
-                    // <span class="label label-default">Entry</span> <span class="label label-default">Tag</span> </div> </div> </div> </div>';
-
-                //Create checkbox dynamically       
-//                 var cb = document.createElement( "input" );
-//                 cb.type = "checkbox";
-//                 cb.name = "libArticle";
-//                 cb.value = data.libArticles[i].id;
-//                 cb.label = data.libArticles[i].title;
-//                 cb.checked = false;
-//                 var br = document.createElement("br");
-//                 node[0].appendChild(br);
-//                 node[0].appendChild(cb);
-//                 var a = document.createElement('a');
-// //                var linkText = document.createTextNode((data.libArticles[i].title).bold());
-//                 var linkText = document.createElement("b");
-//                 linkText.innerHTML = data.libArticles[i].title
-//                 a.appendChild(linkText);
-//                 a.title = data.libArticles[i].title;
-//                 a.href =  $SCRIPT_ROOT + '/write_response/' + data.libArticles[i].id.toString();
-//                 var br = document.createElement("br");
-//                 node[0].appendChild(a);
-//                 var br = document.createElement("br");
-//                 node[0].appendChild(br);
-//                 var theTxt = document.createTextNode(data.libArticles[i].text);
-//                 node[0].appendChild(theTxt);
-//                 var br = document.createElement("br");
-//                 node[0].appendChild(br);
-//                 node[0].appendChild(document.createTextNode("Tags: " + data.libArticles[i].tags))
-//                 var br = document.createElement("br");
-//                 node[0].appendChild(br);
             }                    
         });              
         return false;

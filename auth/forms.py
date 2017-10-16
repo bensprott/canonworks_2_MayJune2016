@@ -20,7 +20,7 @@ class PrivateMessageReply(Form):
     text = PageDownField("Text", validators=[Required()])
     original_messageID = HiddenField()
     srcLibEntries = HiddenField(label=None, id="srcLibArticles")
-    submit = SubmitField('Send Message', id="new_entry_submit_button")
+    submit = SubmitField('Send Message', id="new_private_message_reply")
 
 
 class NewPrivateMessage(Form):
@@ -30,7 +30,7 @@ class NewPrivateMessage(Form):
     title = TextAreaField("Title", validators=[Required()])
     text = PageDownField("Text", validators=[Required()])
     srcLibEntries = HiddenField(label=None, id="srcLibArticles")
-    submit = SubmitField('Send Message', id="new_entry_submit_button")
+    submit = SubmitField('Send Message', id="new_private_message")
 
 
 

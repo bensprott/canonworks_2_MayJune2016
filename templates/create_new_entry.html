@@ -30,8 +30,7 @@
                     </form>
         <div id="">
             <div class="v-spacer2"></div>
-            <div id="savedLibArticles">
-            </div>
+            <div id="savedLibArticles"></div>
             Add any entries that support your response!                
             <h3>Your Library and Your Entries:</h3>                
             <dd><input type = text size=30 class="form-control" id = "libFilterTags">  <input class="btn btn-primary" type=submit value="Filter on Tags" id = "libTagFilterButton">
@@ -49,7 +48,7 @@
                                 <i class="fa fa-calendar fa-fw"></i> {{entry.date_posted}}                                
                             </p>
                             {% for tag in entry.tagList %}
-                                <span class="label label-default">{{tag}}</span>
+                                <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                             {% endfor %}
                         </div>
                         </div>

@@ -94,7 +94,7 @@ from auth import auth as auth_blueprint
 app.config.from_object(__name__)
 app.register_blueprint(auth_blueprint, url_prefix = '/auth')
 entComp = CompareEntries(g)
-app.config['CANONWORKS_ADMIN'] = "shilefasugba@gmail.com"
+app.config['CANONWORKS_ADMIN'] = "admin@thecanonworks.com"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DATABASE
 app.config['SECURITY_REGISTERABLE'] = True
@@ -718,6 +718,24 @@ def set_community_name(commID):
     return redirect(url_for('display_community', commID = commID))
 
 
+@app.route('/set_community_info/<commID>', methods = ['GET', 'POST'])
+@login_required
+def set_community_info(commID):
+    '''
+        set the community name and community text
+    '''
+    aComm = Communities.query.filter_by(id = commID).first()
+    if current_user.is_in_this_community(aComm) :
+        aComm.community_name = request.form['comm_name']
+        aComm.page.eplanation_text = request.form['comm_desc']
+        aComm.page.community_name = request.form['comm_name']
+        alchemyDB.session.commit()
+        flash("Changed the community name!")
+    else :
+        flash("You are not in that community!")
+    return redirect(url_for('display_community', commID = commID))
+    
+    
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
@@ -1243,7 +1261,8 @@ def write_response(id):
     '''
     origObj = Entries.query.filter(Entries.id == id).first()
     origTags = [x.tag for x in origObj.tags]
-    original_post = dict(title=origObj.title, text=origObj.text, body_html=origObj.body_html, user_name = origObj.user_who_created.user_name, date_posted = origObj.date_posted, date_posted_current_timezone = get_localzone().localize(origObj.date_posted), tags = origTags, id=origObj.id, user_id=origObj.user_id)
+    original_post = convertEntryObjectTDict(origObj)
+    original_post1 = dict(title=origObj.title, text=origObj.text, body_html=origObj.body_html, user_name = origObj.user_who_created.user_name, date_posted = origObj.date_posted, date_posted_current_timezone = get_localzone().localize(origObj.date_posted), tags = origTags, id=origObj.id, user_id=origObj.user_id)
     userLibrary = [a.library_entry for a in current_user.user_library]
     userLibrary.extend(current_user.users_entries)
     userLibEntries = convertEntryListToDictList(userLibrary)
@@ -1407,13 +1426,29 @@ def filter_communities():
 
 
 @app.route('/show_filtered_entries', methods = ['GET', 'POST'])
-def filter_entries():
+def filter_entries(aTag = None):
     '''
         will show articles filtered down to include only those with given tags
     '''
-    entries = getAllArticlesGivenTags(request.form['tags'])
+    if aTag == None :
+        entries = getAllArticlesGivenTags(request.form['tags'])
+    else :
+        entries = getAllArticlesGivenTags(aTag)
     return index(entries)
 
+
+@app.route('/show_filtered_entries/<aTag>', methods = ['GET', 'POST'])
+def filter_entries2(aTag = None):
+    '''
+        will show articles filtered down to include only those with given tags
+    '''
+    if aTag == None :
+        entries = getAllArticlesGivenTags(request.form['tags'])
+    else :
+        entries = getAllArticlesGivenTags(aTag)
+    return index(entries)
+    
+    
 
 def getAllArticlesGivenTags(tags):
     '''
@@ -1837,7 +1872,9 @@ def read_private_message(message_id):
         sharedCommunities  = [x.community_name for x in getSharedCommunities(current_user, sender)]  
         recipientUser = message.sender_user   
         if sendPM_PermissionsAreMet(recipientUser) :      
-            form = NewPrivateMessage()              
+            form = NewPrivateMessage()             
+            userLib = current_user.user_library.all()
+            userLib = [a.library_entry for a in userLib]
             if form.validate_on_submit():
                 recipientID = recipientUser.id        
                 title = "re : " + message.title
@@ -1855,7 +1892,7 @@ def read_private_message(message_id):
                 alchemyDB.session.commit()
                 flash("Your reply has been sent!") 
                 return redirect("messaging_center")
-            return render_template("read_private_message.html", form = form, message = privateMessageToDict(message), comms = sharedCommunities, replyChain = convertPM_ListToDictList([message] + getReplyPM_Chain(message)), permissions_met = sendPM_PermissionsAreMet(sender))
+            return render_template("read_private_message.html", form = form, message = privateMessageToDict(message), comms = sharedCommunities, replyChain = convertPM_ListToDictList([message] + getReplyPM_Chain(message)), permissions_met = sendPM_PermissionsAreMet(sender), userLib =  convertEntryListToDictList(userLib))
         else :
             flash("You don't have permissions to private message this user!  They must have blocked you while you were crafting your response.  Sorry for the inconvenience!")
         return redirect("messaging_center")           
@@ -2025,8 +2062,8 @@ def public_user_page(userID):
     communities = [x.community for x in aUser.users_communities]
     sharedComms = []
     if current_user.is_authenticated and aUser !=current_user :
-        sharedComms = getSharedCommunities(current_user, aUser)            
-    return render_template("user-public-profile.html", user = convertUserToJinjaDict(aUser))
+        sharedComms = getSharedCommunities(current_user, aUser) 
+    return render_template('user-public-profile.html', user = convertUserToJinjaDict(aUser))
 
 
 @app.route('/ban_user_from_user_page/<userID>', methods =['GET'])

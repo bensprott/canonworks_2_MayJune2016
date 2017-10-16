@@ -21,7 +21,7 @@
                   Entries : {{comm.numberDocs}}
                 </p>
                 {% for tag in comm.tags %}
-                    <span class="label label-default">{{tag}}</span>
+                    <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                 {% endfor %}
               </div>
             </div>

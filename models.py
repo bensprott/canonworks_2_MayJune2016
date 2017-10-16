@@ -174,9 +174,9 @@ class Entries(alchemyDB.Model):
                                                  backref = alchemyDB.backref('entries_with_this_tag_and_user', lazy = 'joined'),
                                                  lazy = 'dynamic',
                                                  cascade = 'all, delete-orphan')
-    '''
+
                                                     
-                                                    source_entries = alchemyDB.relationship('SourceToOutputRelation',
+    source_entries = alchemyDB.relationship('SourceToOutputRelation',
                                             primaryjoin="SourceToOutputRelation.output_article==Entries.id",
                                             foreign_keys = [SourceToOutputRelation.output_article],
                                             backref = alchemyDB.backref('output', lazy = 'joined'),
@@ -189,7 +189,7 @@ class Entries(alchemyDB.Model):
                                             lazy = 'dynamic',
                                             cascade = 'all, delete-orphan')
                                                  
-    '''
+
     
     source_entries = alchemyDB.relationship('SourceToOutputRelation',
                                             foreign_keys = [SourceToOutputRelation.output_article],

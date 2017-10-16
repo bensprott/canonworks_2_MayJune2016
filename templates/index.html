@@ -127,7 +127,7 @@
                                                                           <i class="fa fa-calendar fa-fw"></i> {{input.date_posted}}
                                                                         </p>
                                                                         {% for tag in input.tagList %}
-                                                                            <span class="label label-default">{{tag}}</span>
+                                                                            <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                                                                         {% endfor %}
                                                                         <p>
                                                                         {% if current_user.id != input.userID and current_user.id != entry.userID%}
@@ -178,7 +178,7 @@
                                                 <button class="btn btn-primary" id="saveToLibButton">Save Entry to Library</button>
                                                 </p>
                                                 {% for tag in entry.tagList %}
-                                                    <span class="label label-default">{{tag}}</span>
+                                                    <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                                                 {% endfor %}
                                             </div>
                                             </div>
@@ -262,7 +262,7 @@
                                       <i class="fa fa-calendar fa-fw"></i> {{entry.date_posted}}                                
                                     </p>
                                     {% for tag in entry.tagList %}
-                                        <span class="label label-default">{{tag}}</span>
+                                        <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                                     {% endfor %}
                                     
                                   </div>

@@ -128,25 +128,26 @@
                 <div class="panel-body">
                     <div class="row">
                         {% for libEntry in user.library%}
-                          <!-- start a library entry -->
-                          <div class="col-md-4">
-                            <div class="panel panel-default">
-                              <div class="panel-body">
-                                <a href="#" class="h5 margin-none">{{libEntry.title}}</a>
-                                <div class="text-muted">
-                                  <small><i class="fa fa-calendar"></i> {{libEntry.date_posted}}</small>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">                        
+                                  <div class="panel-body">
+                                    <div class="media media-clearfix-xs-min">
+                                        <div class="media-body">
+                                            <h3 class="media-heading h4"><a href="{{ url_for('write_response', id=libEntry.id) }}">{{ libEntry.title }}</a></h3>
+                                            <p class="small text-muted">
+                                                <!-- <i class="fa fa-clock-o fa-fw"></i> time since post -->
+                                                <i class="fa fa-user fa-fw"></i> <a href="{{ url_for('public_user_page', userID=libEntry.userID) }}">{{libEntry.user_name}}</a>
+                                                <i class="fa fa-calendar fa-fw"></i> {{libEntry.date_posted}}                                
+                                            </p>
+                                            {% for tag in libEntry.tagList %}
+                                                <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
+                                            {% endfor %}
+                                        </div>
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
-                              <div class="panel-body">                            
-                                <div>
-                                  <div class="pull-right">
-                                    <a href="#" class="btn btn-primary btn-xs">explore</a>
-                                  </div>
-                                </div>
-                              </div>                      
-                            </div>                    
-                          </div> <!-- end a library entry -->
-                        {% endfor %}
+                            </div>
+                        {% endfor %}                    
                     </div>
                 </div>
             </div>

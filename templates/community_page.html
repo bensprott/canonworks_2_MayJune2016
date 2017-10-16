@@ -75,17 +75,15 @@
                             <br>
                             <input type=submit value = "Upload">
                         </form> 
-                        <p>
-                        <form method=POST action="{{ url_for('set_community_name', commID=commPageData.commID)}}">
-                            Change the community name.
-                            <input type=text size=50 name=comm_name>
-                            <input type=submit value="Change Community Name">
+                        <p>           
+                        <form method=POST action="{{url_for('set_community_info', commID = commPageData.commID)}}"}>
+                            Update Community Info
+                            <p>
+                            <input type=text size=50 name=comm_name placeholder='New Community Name'>
+                            <p>
+                            <input type=text size=100 name=comm_desc placeholder='New Community Description'>
+                            <input type=submit value="Update">
                         </form>
-                        <form method=POST action="{{url_for('set_community_description', commID = commPageData.commID)}}">
-                            Change the community description.
-                            <input type=text size=100 name=comm_desc>
-                            <input type=submit value="Change Description">
-                        </form>                
                 </div>    
             {% endif %}
         {% endif %}
