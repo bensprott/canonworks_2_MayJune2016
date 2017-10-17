@@ -244,8 +244,7 @@ $(function(){
         $.getJSON($SCRIPT_ROOT + '/_save_to_read_history',{
             original_id : $("#original_post_id").val()
         }, function(data) {    
-            buttonDiv = document.getElementById("saveToLibButton");
-            buttonDiv.remove();
+            $('#saveToLibButton').remove();
             document.getElementById("SaveToLibResponse").innerHTML = String(data.returnString);
         });        
     });

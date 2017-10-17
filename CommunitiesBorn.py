@@ -59,7 +59,7 @@ if "linux" in (sys.platform).lower() :
     
 elif "win" in (sys.platform).lower() :
     app.wsgi_app = StreamConsumingMiddleware(app.wsgi_app)
-    DATABASE = 'C:\\flaskDB\\commBorn14.db'
+    DATABASE = 'C:\\flaskDB\\commBorn17.db'
     UPLOAD_FOLDER = 'C:\\Users\\BenGaming\\git\\canonworksFeb2016\\static\\images\\'
     app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
     app.config['MAIL_PORT'] = 587
@@ -275,11 +275,34 @@ def getAllUsersTags(user):
         for tag in tagList :
             tags.add(tag.tag)
     return list(tags)
+
+    
+def getAllUsersFriends() :
+    '''
+        Gets all the current user's freinds
+    '''
+    messages = (current_user.received_private_messages.all())
+    peopleWhoMessaged = []
+    for mess in messages :
+        peopleWhoMessaged.append(mess.recipient_user)
+    peopleWhoMessaged = list(set(peopleWhoMessaged))
+    return peopleWhoMessaged
+
+def convertFriendListToJinjaDictList(friends):
+    '''
+        takes a list of users ( who are friends)
+        and converts it to a list of dictionaries of friends
+    '''
+    friendDictList = []
+    for friend in friends :
+        friendDictList.append({'name':friend.user_name, 'id':friend.id})
+    return friendDictList
     
 def convertUserToJinjaDict(user):
     '''
         converts a user to a user dictionary
     '''
+    
     return {'id': user.id,\
             'name':user.user_name,\
             'email':user.user_email,'role':user.role.name,\
@@ -290,7 +313,9 @@ def convertUserToJinjaDict(user):
             'bio':user.user_biography,\
             'date_of_birth':user.date_of_birth, \
             'banned': user.role.name == "Banned",\
-            'library' : convertEntryListToDictList([x.entry for x in user.user_library.all()])}
+            'library' : convertEntryListToDictList([x.entry for x in user.user_library.all()]),
+            'friends' : convertFriendListToJinjaDictList(getAllUsersFriends())}
+            
     
 @app.route('/private_user_profile', methods=['GET', 'POST'])
 @login_required
@@ -517,6 +542,7 @@ def convertSrcOutListToJinjaDictList2(respList):
     '''
     dictList = []    
     for srcOut in respList :
+        print("Got here!")
         orig_title = srcOut.source.title
         out_title = srcOut.output.title
         response_user = srcOut.output.user_who_created.user_name
@@ -572,14 +598,14 @@ def getAllUsersConfirmedResponses(aUser):
                 confEntries.append(srcOut)
     return confEntries
 
-def convertSrcOutListToJinjaDictList(respList):
+def convertSrcOutListToJinjaDictList3(respList):
     '''
         We want to build a page of responses based on source Output relations.
         Here we convert a list of source out relations into a list of dictionaries
         which can be parsed by Jinja.
     '''
     dictList = []    
-    for srcOut in respList :
+    for srcOut in respList :        
         if current_user != srcOut.source.user_who_created :
             responder = srcOut.source.user_who_created.user_name
             out_title = srcOut.source.title
@@ -599,8 +625,58 @@ def convertSrcOutListToJinjaDictList(respList):
                          'response_type' : srcOut.confirmedRelType.resp_rel_type.name,
                          'responder' : responder,
                          'srcOutID' : srcOut.id})
+        print(dictList[0])
     return dictList
 
+def convertSrcOutListToJinjaDictList(respList):
+    '''
+        We want to build a page of responses based on source Output relations.
+        Here we convert a list of source out relations into a list of dictionaries
+        which can be parsed by Jinja.
+    '''
+    dictList = []    
+    for srcOut in respList :        
+        
+        if current_user != srcOut.source.user_who_created :
+            responder = srcOut.source.user_who_created.user_name
+            out_title = srcOut.source.title
+            orig_title = srcOut.output.title
+        elif current_user != srcOut.output.user_who_created :
+            responder = srcOut.output.user_who_created.user_name            
+            out_title = srcOut.output.title
+            orig_title = srcOut.source.title
+        else :
+            responder = "You"
+            out_title = srcOut.output.title
+            orig_title = srcOut.source.title
+        dictList.append({'src_title' : srcOut.source.title,
+                         'out_title'  : srcOut.output.title,
+                         'src_id' : srcOut.source.id,
+                         'out_id' : srcOut.output.id,
+                         'src_date' : srcOut.source.date_posted,
+                         'out_date' : srcOut.output.date_posted,
+                         'tags' : list(set((convertTagQueryIntoTagString(srcOut.source.tags) + " " + convertTagQueryIntoTagString(srcOut.output.tags)).split(" "))),
+                         'connection_date' : srcOut.confirmedRelType.date_of_confirmation,
+                         'connection_type' : srcOut.confirmedRelType.resp_rel_type.name,
+                         'src_user_name' : srcOut.source.user_who_created.user_name,
+                         'out_user_name' : srcOut.output.user_who_created.user_name,
+                         'src_user_id' : srcOut.source.user_id,
+                         'out_user_id' : srcOut.output.user_id})
+        print(dictList[0])
+    return dictList    
+
+'''
+    Takes two lists of tag strings and gives a list of unit strings
+'''    
+def mergeTagLists(tagStrList1, tagStrList2) :
+    set1 = set(tagStrList1)
+    set2 = set(tagStrList2)
+    set3 = set.union(set1,set2)
+    return list(set3)
+    
+
+    
+    
 @app.route('/your_responses/', methods = ['GET', 'POST'])
 @login_required
 def your_responses():
@@ -609,7 +685,9 @@ def your_responses():
         successfully confirmed.
     '''
     responses = getAllUsersConfirmedResponses(current_user)
-    return render_template('your_responses.html', responses = convertSrcOutListToJinjaDictList(responses))
+    for resp in responses:
+        print(responses)
+    return render_template('your_responses.html', connections = convertSrcOutListToJinjaDictList(responses))
 
 def buildResponsePageDict(srcOutRelation):
     '''

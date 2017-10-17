@@ -175,22 +175,23 @@ class Entries(alchemyDB.Model):
                                                  lazy = 'dynamic',
                                                  cascade = 'all, delete-orphan')
 
-                                                    
-    source_entries = alchemyDB.relationship('SourceToOutputRelation',
-                                            primaryjoin="SourceToOutputRelation.output_article==Entries.id",
-                                            foreign_keys = [SourceToOutputRelation.output_article],
-                                            backref = alchemyDB.backref('output', lazy = 'joined'),
-                                            lazy = 'dynamic',
-                                            cascade = 'all, delete-orphan')
-    output_entries = alchemyDB.relationship('SourceToOutputRelation',                                            
-                                            primaryjoin="SourceToOutputRelation.source_article==Entries.id",
-                                            foreign_keys = [SourceToOutputRelation.source_article],
-                                            backref = alchemyDB.backref('source', lazy = 'joined'),
-                                            lazy = 'dynamic',
-                                            cascade = 'all, delete-orphan')
                                                  
 
-    
+
+    '''                                                    
+        source_entries = alchemyDB.relationship('SourceToOutputRelation',
+                                                primaryjoin="SourceToOutputRelation.output_article==Entries.id",
+                                                foreign_keys = [SourceToOutputRelation.output_article],
+                                                backref = alchemyDB.backref('output', lazy = 'joined'),
+                                                lazy = 'dynamic',
+                                                cascade = 'all, delete-orphan')
+        output_entries = alchemyDB.relationship('SourceToOutputRelation',                                            
+                                                primaryjoin="SourceToOutputRelation.source_article==Entries.id",
+                                                foreign_keys = [SourceToOutputRelation.source_article],
+                                                backref = alchemyDB.backref('source', lazy = 'joined'),
+                                                lazy = 'dynamic',
+                                                cascade = 'all, delete-orphan')
+    '''                                                 
     source_entries = alchemyDB.relationship('SourceToOutputRelation',
                                             foreign_keys = [SourceToOutputRelation.output_article],
                                             backref = alchemyDB.backref('output', lazy = 'joined'),

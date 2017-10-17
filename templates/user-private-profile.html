@@ -18,7 +18,7 @@
               <div class="tab-content">
                 <div class="tab-pane fade active in" id="home">
                     {% for tag in user.tags %}
-                        <span class="label label-default">{{tag}}</span>
+                        <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                     {% endfor %}
                 </div>
                 <div class="tab-pane fade" id="profile">
@@ -74,47 +74,11 @@
                   </div>
                   <div class="panel-body">
                     <ul class="img-grid">
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/guy-6.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/woman-3.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/guy-2.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/guy-9.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/woman-9.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li class="clearfix">
-                        <a href="#">
-                          <img src="images/people/110/guy-4.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/guy-1.jpg" alt="image" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <img src="images/people/110/woman-4.jpg" alt="image" />
-                        </a>
-                      </li>
-                      
+                        <li>
+                            {% for friend in user.friends %}
+                                <i class="fa fa-user fa-fw"> <a href="{{ url_for('public_user_page', userID=friend.id) }}">{{friend.name}}</a></i>                     
+                            {% endfor %}
+                        </li> 
                     </ul>
                   </div>
                 </div>
