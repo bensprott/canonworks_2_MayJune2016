@@ -59,7 +59,7 @@ if "linux" in (sys.platform).lower() :
     
 elif "win" in (sys.platform).lower() :
     app.wsgi_app = StreamConsumingMiddleware(app.wsgi_app)
-    DATABASE = 'C:\\flaskDB\\commBorn17.db'
+    DATABASE = 'C:\\flaskDB\\commBorn20.db'
     UPLOAD_FOLDER = 'C:\\Users\\BenGaming\\git\\canonworksFeb2016\\static\\images\\'
     app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
     app.config['MAIL_PORT'] = 587
@@ -174,17 +174,31 @@ def create_entry() :
 def index(entries = None):
     if entries == None :
         page = request.args.get('page', 1, type=int)
-        pagination = Entries.query.order_by(Entries.date_posted.desc()).paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False)
+        pagination = Entries.query.filter_by(moderator_approved = True).order_by(Entries.date_posted.desc()).paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False)
         entries = pagination.items
     else :
         page = request.args.get('page', 1, type=int)
-        pagination = entries.paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False)
+        pagination = entries.paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False)      
     background = None
-    avatar = None
-  
-    
+    avatar = None   
     return render_template('index.html', entries=convertEntryListToDictList(entries), background = background, avatar = avatar, pagination = pagination)
 
+@app.route('/mod_approves_entries/', methods = ['GET', 'POST'])
+@login_required
+def mod_approves_entries(entries = None):
+    showApproved = True
+    if current_user.can(Permission.MODERATE_COMMENTS) :
+        showApproved = False
+    if entries == None :
+        page = request.args.get('page', 1, type=int)
+        pagination = Entries.query.filter_by(moderator_approved = showApproved).order_by(Entries.date_posted.desc()).paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False)
+        entries = pagination.items
+    else :
+        page = request.args.get('page', 1, type=int)
+        pagination = entries.filter_by(moderator_approved = showApproved).paginate(page, per_page=current_app.config['CANON_POSTS_PER_PAGE'], error_out = False).filter_by(moderator_approved = True)        
+    background = None
+    avatar = None
+    return render_template('index.html', entries=convertEntryListToDictList(entries), background = background, avatar = avatar, pagination = pagination)
 
 @app.route('/logout')
 @login_required
@@ -505,7 +519,6 @@ def compare_these_articles(srcTrgtID):
     srcDict = convertEntryObjectTDict(srcTargetObj.source)
     tarDict = convertEntryObjectTDict(srcTargetObj.output)
     relTypes = [{"desc" : x.descriptor, "id" : x.id, "name":x.name} for x in ResponseRelationTypes.query.all()]
-    print(srcDict['body_html'])
     if current_user.id != srcDict["userID"] and current_user.id != tarDict["userID"] :
         return render_template('compare_these_articles.html', srcTrgID = srcTrgtID, srcDict=srcDict, targDict=tarDict, relTypes = relTypes)
     else :
@@ -542,7 +555,6 @@ def convertSrcOutListToJinjaDictList2(respList):
     '''
     dictList = []    
     for srcOut in respList :
-        print("Got here!")
         orig_title = srcOut.source.title
         out_title = srcOut.output.title
         response_user = srcOut.output.user_who_created.user_name
@@ -625,7 +637,6 @@ def convertSrcOutListToJinjaDictList3(respList):
                          'response_type' : srcOut.confirmedRelType.resp_rel_type.name,
                          'responder' : responder,
                          'srcOutID' : srcOut.id})
-        print(dictList[0])
     return dictList
 
 def convertSrcOutListToJinjaDictList(respList):
@@ -662,7 +673,6 @@ def convertSrcOutListToJinjaDictList(respList):
                          'out_user_name' : srcOut.output.user_who_created.user_name,
                          'src_user_id' : srcOut.source.user_id,
                          'out_user_id' : srcOut.output.user_id})
-        print(dictList[0])
     return dictList    
 
 '''
@@ -1294,7 +1304,7 @@ def convertEntryObjectTDict(EntryObject):
     tagList = tags.split(" ")
     inputs = [inputOrOutputToDict(EntryObject, input = x.source) for x in EntryObject.source_entries.all()]
     outputs = [inputOrOutputToDict(EntryObject, output = x.output) for x in EntryObject.output_entries.all()]
-    return {'id' : EntryObject.id, 'title':EntryObject.title, 'text':EntryObject.text[:50], 'body_html' : EntryObject.body_html, 'tags':tags, 'tagList' : tagList, 'date_posted' : EntryObject.date_posted, 'date_posted_current_timezone': get_localzone().localize(EntryObject.date_posted), 'user_name' : EntryObject.user_who_created.user_name, 'userID':EntryObject.user_who_created.id, 'inputs': inputs, 'outputs':outputs}
+    return {'id' : EntryObject.id, 'title':EntryObject.title, 'text':EntryObject.text[:50], 'body_html' : EntryObject.body_html, 'tags':tags, 'tagList' : tagList, 'date_posted' : EntryObject.date_posted, 'date_posted_current_timezone': get_localzone().localize(EntryObject.date_posted), 'user_name' : EntryObject.user_who_created.user_name, 'userID':EntryObject.user_who_created.id, 'inputs': inputs, 'outputs':outputs, 'mod_approved' : EntryObject.moderator_approved}
 
 
 def convertEntryListToDictList(entryList):
@@ -1326,7 +1336,9 @@ def view_latest_posts():
 @login_required
 @mod_required
 def delete_entry(id):
-    Entries.query.filter_by(id=id).delete()
+    #Entries.query.filter_by(id=id).delete()
+    anEntry = Entries.query.filter_by(id=id)
+    alchemyDB.session.delete(anEntry)
     flash("Entry deleted.")
     return redirect(url_for('index'))
 
@@ -1356,7 +1368,6 @@ def write_response(id):
         alchemyDB.session.add(anEntry)
         alchemyDB.session.flush()        
         anEntry.tags.extend(tagObjectList)     
-        print(form.srcLibEntries.data)
         create_src_to_output_rel(form.srcLibEntries.data, anEntry.id)      
         alchemyDB.session.commit()
         flash('New entry was successfully posted!')        
@@ -1459,7 +1470,6 @@ def getFilterCommunitiesFilteredOnTagsQuery(tags):
     '''
     q = SourceToOutputRelation.query.join(Entries.source_entries, Entries.output_entries)
          
-    print(q.all())
     '''
         
          join(original_tag_registration).\
@@ -1477,7 +1487,6 @@ def getFilterCommunitiesFilteredOnTagsQuery(tags):
               filter(alias1.id == alias2.c.tag_id).\
               filter(alias1.tag == tag)
         i += 1 
-    print(q.all())
     return q        
         
 
@@ -1499,7 +1508,6 @@ def filter_communities():
         will show articles filtered down to include only those with given tags
     '''
     commList = getAllCommunitiesGivenTags(request.form['tags'])
-    print(commList)
     return render_template("latest_communities.html", commList = commDictList)
 
 
@@ -1508,6 +1516,7 @@ def filter_entries(aTag = None):
     '''
         will show articles filtered down to include only those with given tags
     '''
+    print("Filtering here!")
     if aTag == None :
         entries = getAllArticlesGivenTags(request.form['tags'])
     else :
@@ -1534,7 +1543,7 @@ def getAllArticlesGivenTags(tags):
     '''    
 
     if tags == '' :
-            return (Entries.query.order_by(Entries.date_posted.desc()))             
+            return (Entries.query.filter_by(moderator_approved = True).order_by(Entries.date_posted.desc()))             
     tagList = splitA_TagStringByCommaAndSpace(tags)
     query = getFilterEntriesFilteredOnTagsQuery(tagList)
     return query
@@ -1763,7 +1772,22 @@ def mod_deletes_post(original_id):
     alchemyDB.session.delete(theEntry)
     alchemyDB.session.commit()
     flash("Entry Deleted!")
-    return redirect(url_for('view_latest_posts'))
+    return redirect(url_for('index'))
+    
+
+@app.route('/mod_approves_post/<original_id>', methods = ['GET', 'POST'])
+@mod_required
+def mod_approves_post(original_id):
+    '''
+        Moderators can approve posts.  This is the basic function to do that.
+    '''
+    theEntry = Entries.query.filter_by(id = original_id).first()
+    theEntry.moderator_approved = True
+    alchemyDB.session.commit()
+    flash("Entry Approved!")
+    return redirect(url_for('index'))
+    
+    
 
 @app.route('/delete_user/', methods = ['GET', 'POST'])
 @admin_required
@@ -1778,7 +1802,7 @@ def delete_user():
 @admin_required
 def admin_deletes_user():
     '''
-        Allows an administrator to set a user's role to moderator
+        Allows an administrator to delete a user
     '''    
     userID = request.form["selected_user"]
     aUser = User.query.filter_by(id = int(userID)).first()

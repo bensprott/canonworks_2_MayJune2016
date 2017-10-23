@@ -79,7 +79,10 @@
                                         <a href="{{ url_for('write_response', id=entry.id) }}">{{ entry.title }}</a>
                                         {%  if current_user.is_authenticated %}
                                             {%  if current_user.role.name == "Moderator" or current_user.role.name == "Administrator" or current_user.role.name == "SiteOwner" %}
-                                                <span class="pull-right"><a class="btn btn-danger" href="{{ url_for('delete_entry', id=entry.id) }}"><i class="fa fa-trash"></i> Delete Entry</a></span>
+                                                <span class="pull-right"><a class="btn btn-danger" href="{{ url_for('mod_deletes_post', original_id=entry.id) }}"><i class="fa fa-trash"></i> Delete Entry</a></span>
+                                                {% if entry.mod_approved == False %}
+                                                    <span class="pull-right"><a class="btn btn-danger" href="{{ url_for('mod_approves_post', original_id=entry.id) }}"><i class="fa fa-trash"></i> Approve Entry</a></span>
+                                                {% endif %}                                                
                                             {% endif %}
                                         {% endif %}
 

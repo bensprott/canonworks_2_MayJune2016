@@ -110,6 +110,9 @@
                     <li><a href="{{ url_for('your_responses')}}">Your Connections</a></li>
                     <li><a href="{{ url_for('view_library') }}">Your Library</a></li>
                     <li><a href="{{ url_for('messaging_center') }}">Your Messaging Center</a></li>
+                    {% if current_user.is_moderator() == True %}
+                        <li><a href="{{ url_for('mod_approves_entries') }}">Review New Entries</a></li>
+                    {% endif %}
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                   {% else %}
                     <li><a href="{{ url_for('auth.login') }}">Login</a></li>

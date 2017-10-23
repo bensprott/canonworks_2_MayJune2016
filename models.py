@@ -47,7 +47,8 @@ class UsersReadArticles(alchemyDB.Model):
     user_id = alchemyDB.Column(alchemyDB.Integer, alchemyDB.ForeignKey('users.id'))
     article_id = alchemyDB.Column(alchemyDB.Integer, alchemyDB.ForeignKey('entries.id'))
     date_read = alchemyDB.Column(alchemyDB.DateTime)
-    library_entry = alchemyDB.relationship("Entries", backref = "user_assoc")
+    library_entry = alchemyDB.relationship("Entries", backref = "user_assoc",
+                                                        cascade = 'all, delete')
 
 class UsersAppliedTags(alchemyDB.Model):
     '''
@@ -165,6 +166,7 @@ class Entries(alchemyDB.Model):
     body_html = alchemyDB.Column(alchemyDB.Text)
     user_id = alchemyDB.Column(alchemyDB.Integer, alchemyDB.ForeignKey('users.id'))
     date_posted = alchemyDB.Column(alchemyDB.DateTime, index = True, default = datetime.utcnow) 
+    moderator_approved = alchemyDB.Column(alchemyDB.Boolean, default = False)
     tags = alchemyDB.relationship('Tags',
                                   secondary = original_tag_registration,
                                   backref = alchemyDB.backref('relevant_entries', lazy = 'dynamic'),
@@ -174,24 +176,7 @@ class Entries(alchemyDB.Model):
                                                  backref = alchemyDB.backref('entries_with_this_tag_and_user', lazy = 'joined'),
                                                  lazy = 'dynamic',
                                                  cascade = 'all, delete-orphan')
-
-                                                 
-
-
-    '''                                                    
-        source_entries = alchemyDB.relationship('SourceToOutputRelation',
-                                                primaryjoin="SourceToOutputRelation.output_article==Entries.id",
-                                                foreign_keys = [SourceToOutputRelation.output_article],
-                                                backref = alchemyDB.backref('output', lazy = 'joined'),
-                                                lazy = 'dynamic',
-                                                cascade = 'all, delete-orphan')
-        output_entries = alchemyDB.relationship('SourceToOutputRelation',                                            
-                                                primaryjoin="SourceToOutputRelation.source_article==Entries.id",
-                                                foreign_keys = [SourceToOutputRelation.source_article],
-                                                backref = alchemyDB.backref('source', lazy = 'joined'),
-                                                lazy = 'dynamic',
-                                                cascade = 'all, delete-orphan')
-    '''                                                 
+                                            
     source_entries = alchemyDB.relationship('SourceToOutputRelation',
                                             foreign_keys = [SourceToOutputRelation.output_article],
                                             backref = alchemyDB.backref('output', lazy = 'joined'),
@@ -206,7 +191,7 @@ class Entries(alchemyDB.Model):
     users_who_saved_to_lib = alchemyDB.relationship('UsersReadArticles',
                                                     backref = alchemyDB.backref('entry', lazy = 'joined'),
                                                     lazy = 'dynamic',
-                                                    cascade = 'all,delete-orphan')
+                                                    cascade = 'all, delete-orphan')
     
     @staticmethod                                  
     def generate_fake(count = 100):
@@ -250,6 +235,7 @@ class Tags(alchemyDB.Model):
     tag = alchemyDB.Column(alchemyDB.String(64), unique=True)
     entries_with_this_tag = alchemyDB.relationship('Entries',
                                                 secondary = original_tag_registration,
+                                                viewonly=True,
                                                 backref = alchemyDB.backref('tag', lazy = 'dynamic'),
                                                 lazy = 'dynamic') 
     bleached_tag = alchemyDB.Column(alchemyDB.String(64), unique=True)
@@ -293,7 +279,6 @@ class Roles(alchemyDB.Model):
         roles = {
                  'User' : (Permission.WRITE_ARTICLES, True),
                  'Moderator' : (Permission.WRITE_ARTICLES | Permission.MODERATE_COMMENTS, False),
-                 #'Administrator' : (0xff, False),
                  'Administrator' : (Permission.ADMINISTER | Permission.WRITE_ARTICLES |Permission.MODERATE_COMMENTS, False),
                  'SiteOwner' : (Permission.ADMINISTER | Permission.WRITE_ARTICLES |Permission.MODERATE_COMMENTS, False),
                  'Banned' : (Permission.BANNED, False)
@@ -518,6 +503,9 @@ class User(UserMixin, alchemyDB.Model):
         '''
             checks permissions for this user.
         '''
+        print("The PErms: ")
+        print(permissions)
+        print(self.role.permissions & permissions)
         return self.role is not None and \
             (self.role.permissions & permissions) == permissions
      
@@ -526,6 +514,8 @@ class User(UserMixin, alchemyDB.Model):
         '''
             checks to see if a user is an administrator
         '''
+        print("Passing the perm: ")
+        print(Permission.ADMINISTER)
         return self.can(Permission.ADMINISTER)
 
     def is_moderator(self):
