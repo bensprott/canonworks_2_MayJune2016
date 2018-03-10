@@ -34,7 +34,7 @@ from threading import Thread
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_pagedown import PageDown
 from HTMLParser import HTMLParser
-
+from sets import Set
 from tzlocal import get_localzone
 
 testAndDebug = True
@@ -1490,26 +1490,70 @@ def getFilterCommunitiesFilteredOnTagsQuery(tags):
     return q        
         
 
+'''
+	Filters communities down to only those communities that have all the given tags in their
+	list of entries.
+'''
+def getFilterCommunitiesFilteredOnTagsQuery2(tagList):
+	
+	communities = Communities.query.all()
+	filteredComms = Set()
+	tagSet = Set(tagList)
+	
+	for comm in communities:
+		intersectTags = Set()
+		articles = Set()
+		tags = Set()
+		for scrOutRel in comm.srcOutRelations_in_this_community:
+			articles.add(scrOutRel.srcOutRelation.source_article)
+			articles.add(scrOutRel.srcOutRelation.output_article)
+		articleList = Entries.query.filter(Entries.id.in_(articles)).all()	
+		for article in articleList:
+			for aTag in article.tags:
+				tags.add(aTag.tag)
+        
+		intersectTags = convertStringSetToAllLower(tags).intersection(convertStringSetToAllLower(tagSet))
+		if len(intersectTags) > 0:
+			filteredComms.add(comm)
+	
+	return list(filteredComms)
+
+'''
+   Returns a string set that is the same string set as the input except everything is lower case
+'''
+def convertStringSetToAllLower(stringSet):
+    returnStrSet = Set()
+    for anStr in stringSet:
+        returnStrSet.add(anStr.lower())
+    return returnStrSet
+
+
+
+
+    
 def getAllCommunitiesGivenTags(tags):
     '''
         gets all articles given tags, returns a list of entries
     '''    
-
-    if tags == '' :
-            return (Communities.query.order_by(Entries.date_posted.desc()))             
+    if tags.isspace():
+        return (Communities.query.order_by(Entries.date_posted.desc()))             
     tagList = splitA_TagStringByCommaAndSpace(tags)
-    query = getFilterCommunitiesFilteredOnTagsQuery(tagList)
-    return query
+    return getFilterCommunitiesFilteredOnTagsQuery2(tagList)
         
 
 @app.route('/show_filtered_communities', methods = ['GET', 'POST'])
 def filter_communities():
     '''
         will show articles filtered down to include only those with given tags
-    '''
-    commList = getAllCommunitiesGivenTags(request.form['tags'])
+    '''			
+    commDictList = convertCommunityListToJinjaDictList(getAllCommunitiesGivenTags(request.form['tags']))
     return render_template("latest_communities.html", commList = commDictList)
 
+@app.route('/filter_communities_one_tag/<aTag>', methods = ['GET', 'POST'])
+def filter_communities_one_tag(aTag):    
+    commDictList = convertCommunityListToJinjaDictList(getAllCommunitiesGivenTags(aTag))
+    return render_template("latest_communities.html", commList = commDictList)
+    
 
 @app.route('/show_filtered_entries', methods = ['GET', 'POST'])
 def filter_entries(aTag = None):
