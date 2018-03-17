@@ -1534,9 +1534,9 @@ def convertStringSetToAllLower(stringSet):
 def getAllCommunitiesGivenTags(tags):
     '''
         gets all articles given tags, returns a list of entries
-    '''    
-    if tags.isspace():
-        return (Communities.query.order_by(Entries.date_posted.desc()))             
+    '''
+    if tags.isspace() or tags == "":
+        return Communities.query.all()             
     tagList = splitA_TagStringByCommaAndSpace(tags)
     return getFilterCommunitiesFilteredOnTagsQuery2(tagList)
         
@@ -1546,7 +1546,7 @@ def filter_communities():
     '''
         will show articles filtered down to include only those with given tags
     '''			
-    commDictList = convertCommunityListToJinjaDictList(getAllCommunitiesGivenTags(request.form['tags']))
+    commDictList = convertCommunityListToJinjaDictList(getAllCommunitiesGivenTags(request.form['tags'].strip()))
     return render_template("latest_communities.html", commList = commDictList)
 
 @app.route('/filter_communities_one_tag/<aTag>', methods = ['GET', 'POST'])
@@ -2038,7 +2038,7 @@ def read_private_message(message_id):
                 alchemyDB.session.commit()
                 flash("Your reply has been sent!") 
                 return redirect("messaging_center")
-            return render_template("read_private_message.html", form = form, message = privateMessageToDict(message), comms = sharedCommunities, replyChain = convertPM_ListToDictList([message] + getReplyPM_Chain(message)), permissions_met = sendPM_PermissionsAreMet(sender), userLib =  convertEntryListToDictList(userLib))
+            return render_template("read_private_message.html", form = form, message = privateMessageToDict(message), comms = sharedCommunities, replyChain = convertPM_ListToDictList([message] + getReplyPM_Chain(message)), permissions_met = sendPM_PermissionsAreMet(sender), userLib =  convertEntryListToDictList(userLib), theSenderId = sender.id)
         else :
             flash("You don't have permissions to private message this user!  They must have blocked you while you were crafting your response.  Sorry for the inconvenience!")
         return redirect("messaging_center")           

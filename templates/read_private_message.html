@@ -16,9 +16,9 @@
                 <div class="timeline-block">
                     {% if permissions_met %}
                         <form method="post" role="form">
-                            {{ form.hidden_tag() }}
+                            {{ form.hidden_tag() }}                            
                             {{ wtf.form_errors(form, hiddens="only") }}
-                            {{ wtf.form_field(form.title) }}
+                            <!--{{ wtf.form_field(form.title) }} -->
                             {{ wtf.form_field(form.text) }}
                             <script>
                                 CKEDITOR.replace( 'text' );
@@ -29,6 +29,7 @@
                     {% else %}
                         It looks like this user is blocked.  You cannot communicate with them.
                     {% endif %}
+                    <h3><a href="{{ url_for('block_user_pm', sender_id=theSenderId) }}">Permanently Block This User</a></h3>
                     <div id = "libArticlesList">                        
                         <h3>Add any entries that you would like to share!</h3>
                         <h4>Your Library and Your Entries:</h4>

@@ -13,8 +13,18 @@
 <div class="left-one">
 
         <div class="row">
+            {%  if current_user.role.name == "Moderator" or current_user.role.name == "Administrator" or current_user.role.name == "SiteOwner" %}
+                <span class="pull-left"><a class="btn btn-danger" href="{{ url_for('mod_deletes_post', original_id=original_post.id) }}"><i class="fa fa-trash"></i> Delete Entry</a></span>
+                {% if original_post.mod_approved == False %}
+                    <span class="pull-right"><a class="btn btn-danger" href="{{ url_for('mod_approves_post', original_id=original_post.id) }}"><i class="fa fa-trash"></i> Approve Entry</a></span>
+                {% endif %}                
+            {% endif %}
+            {% if current_user.role.name == "Administrator" or current_user.role.name == "Moderator" or current_user.role.name == "SiteOwner" %}
+                    <a class="left-one btn btn-danger" href="{{url_for('ban_user_from_user_page', userID = original_post.userID)}}"><i class="fa fa-times"></i> Ban User </a>
+            {% endif %}
             <div class="col-md-12 post">
                 <div class="row">
+
                     <div class="col-md-12">
                         <h4>
                             <strong>{{original_post.title}}</strong></h4>
@@ -53,6 +63,7 @@
             </div>
         <div class="container-fluid">
             <div>
+                <h3>Write Response: </h3>
                 <div class="v-spacer2"></div>
                 <div class="timeline row" data-toggle="isotope">
                   <div class="col-xs-12 col-md-12 col-lg-12 item">

@@ -25,8 +25,9 @@
               <a class="btn btn-primary" href="{{url_for('send_private_message_from_user_page', userID = user.id)}}"><i class="fa fa-envelope"></i> Send Private Message </a>
 
                 {% if current_user.role.name == "Administrator" or current_user.role.name == "Moderator" or current_user.role.name == "SiteOwner" %}
-                    <a class="left-one btn btn-danger" href="{{url_for('ban_user_from_user_page', userID = user.id)}}"><i class="fa fa-times"></i> Ban User </a>
-
+                    {% if current_user.id != user.id %}
+                        <a class="left-one btn btn-danger" href="{{url_for('ban_user_from_user_page', userID = user.id)}}"><i class="fa fa-times"></i> Ban User </a>
+                    {% endif %}
                 {% endif %}
 
 
@@ -80,7 +81,7 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <div class="panel panel-default">
+                <!--<div class="panel panel-default">
                   <div class="panel-heading panel-heading-gray">
                     <div class="pull-right">
                       <a href="#" class="btn btn-primary btn-xs">Add <i class="fa fa-plus"></i></a>
@@ -102,6 +103,7 @@
                     </ul>
                   </div>
                 </div>
+                -->
               </div>
             </div>
           </div>

@@ -31,10 +31,12 @@
                         </div>
                     </div>
                     {% if current_user.is_authenticated %}  
-                        <div class="stnt pull-left">                            
-                            <form action="{{url_for('create_entry')}}" method="post" class="form">
+                        <div class="stnt pull-left"> 
+                            <h2><a href = "{{url_for('create_entry')}}">Start New Topic</a></h2>                        
+                            <!--<form action="{{url_for('create_entry')}}" method="post" class="form">
                                 <button class="btn btn-primary">Start New Topic</button>
                             </form>
+                            -->
                         </div>
                     {% endif %}                    
                   </div>

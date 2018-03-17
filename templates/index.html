@@ -70,9 +70,6 @@
                               <div class="panel-body">
                                 <div class="media media-clearfix-xs-min">
                                   <div class="media-left">
-                                    <a href="lesson.html">
-                                      <span class="media-object icon-block bg-default"><i class="fa fa-github"></i></span>
-                                    </a>
                                   </div>
                                   <div class="media-body">
                                     <h3 class="media-heading h4">
@@ -130,12 +127,12 @@
                                                                           <i class="fa fa-calendar fa-fw"></i> {{input.date_posted}}
                                                                         </p>
                                                                         {% for tag in input.tagList %}
-                                                                            <a href="{{url_for('filter_entries2', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
+                                                                            <a href="{{url_for('filter_communities_one_tag', aTag=tag)}}"><span class="label label-default">{{tag}}</span></a>
                                                                         {% endfor %}
                                                                         <p>
                                                                         {% if current_user.id != input.userID and current_user.id != entry.userID%}
                                                                             <div class="carousel-compare-entry-link">
-                                                                                <h3><a href="{{ url_for('compare_these_articles', srcTrgtID=input.srcTargID) }}">Compare these Entries</a></h3>
+                                                                               <h3><a href="{{url_for('compare_these_articles', srcTrgtID=input.srcTargID)}}">Compare these Entries</a></h3>
                                                                             </div>
                                                                         {% endif %}
                                                                       </div>
@@ -210,11 +207,6 @@
                                                                 <div class="panel panel-default">                        
                                                                   <div class="panel-body">
                                                                     <div class="media media-clearfix-xs-min">
-                                                                      <div class="media-left">
-                                                                        <a href="lesson.html">
-                                                                          <span class="media-object icon-block bg-default"><i class="fa fa-github"></i></span>
-                                                                        </a>
-                                                                      </div>
                                                                       <div class="media-body">
                                                                         <h3 class="media-heading h4"><a href="{{ url_for('write_response', id=output.id) }}">{{ output.title }}</a></h3>
                                                                         <p class="small text-muted">
