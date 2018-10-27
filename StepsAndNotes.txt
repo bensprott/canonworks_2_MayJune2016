@@ -1,0 +1,4 @@
+To create the database:
+
+Had to change sqlalchemy to 1.1:
+c:\Python27\Scripts>pip install --upgrade sqlalchemy==1.1

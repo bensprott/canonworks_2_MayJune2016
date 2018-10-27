@@ -14,8 +14,11 @@ class StreamConsumingMiddleware(object):
         self.app = app
 
     def __call__(self, environ, start_response):
-        stream = LimitedStream(environ['wsgi.input'],
-                               int(environ['CONTENT_LENGTH'] or 0))
+        try:
+            request_body_size = int(environ.get('CONTENT_LENGTH', 0))
+        except (ValueError):
+            request_body_size = 0
+        stream = LimitedStream(environ['wsgi.input'], request_body_size)    
         environ['wsgi.input'] = stream
         app_iter = self.app(environ, start_response)
         try:
