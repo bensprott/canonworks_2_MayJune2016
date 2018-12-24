@@ -690,7 +690,8 @@ class ResponseRelationTypes(alchemyDB.Model):
                             "refutes" : "refutes",
                             "critiques" : "critiques",
                             "equivalent" : "says the same thing as",
-                            "no relation" : "has no relation to"}
+                            "no relation" : "has no relation to",
+                            "insults" : "insults"}
                             
         
         with app.app_context():

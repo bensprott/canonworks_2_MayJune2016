@@ -1,6 +1,30 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Converter.js"> </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Editor.js"> </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Sanitizer.js"> </script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"> </script>
+
+<link href="{{ url_for('static', filename='canon.css') }}" rel="stylesheet">
+
+<script>
+    $(document).ready(function(){
+        $('#editMode').hide();
+        $('#closeEdit').hide();
+
+        $('#editIcon').click(function () {
+            $('#viewMode').hide();
+            $('#editIcon').hide();
+            $('#closeEdit').show();
+            $('#editMode').show();
+        });
+        $('#closeEdit').click(function () {
+            $('#closeEdit').hide();
+            $('#editMode').hide();
+            $('#viewMode').show();
+            $('#editIcon').show();
+        });
+    })
+</script>
+
 {% extends "layout.html" %}
 {% block scripts %}
     {{super()}}
@@ -9,9 +33,7 @@
 {% import "bootstrap/wtf.html" as wtf %}          
 {% block body %}
     {% if current_user.is_authenticated %}
-
-<div class="left-one">
-
+        <div class="left-one">
         <div class="row">
             {%  if current_user.role.name == "Moderator" or current_user.role.name == "Administrator" or current_user.role.name == "SiteOwner" %}
                 <span class="pull-left"><a class="btn btn-danger" href="{{ url_for('mod_deletes_post', original_id=original_post.id) }}"><i class="fa fa-trash"></i> Delete Entry</a></span>
@@ -24,10 +46,19 @@
             {% endif %}
             <div class="col-md-12 post">
                 <div class="row">
-
                     <div class="col-md-12">
                         <h4>
-                            <strong>{{original_post.title}}</strong></h4>
+                            <strong>{{original_post.title}}</strong>
+                            {% if original_post.userID == current_user.id %}
+                                <span class="glyphicon glyphicon-edit" id="editIcon">
+                                </span>
+                                <span class="glyphicon glyphicon-remove hide-display" id="closeEdit">
+                                </span>
+                            {% else %}
+                                <span class="glyphicon glyphicon-flag" id="flagPost"></span>
+                            {% endif %} 
+                            
+                        </h4>
                     </div>
                 </div>
                 <div class="row">
@@ -40,27 +71,38 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="row post-content">
-                    <div class="col-md-9">
-                        <p>
-                            {{original_post.body_html | safe}}
-                        </p>
+                    <div id="viewMode" class="row post-content">
+                        <div class="col-md-9">
+                            <p>
+                                {{original_post.body_html | safe}}
+                            </p>
+                        </div>
+                    </div>
+                    <div id="editMode">
+                        <form method="post" role="form" id="edit_form">
+                            {{ form.hidden_tag() }}
+                            {{ wtf.form_errors(form, hiddens="only") }}
+                            {{ wtf.form_field(form.title) }}
+                            {{ wtf.form_field(form.text) }}
+                            <script>
+                                CKEDITOR.replace( 'text' );
+                            </script>
+                            {{ wtf.form_field(form.tags) }}
+                            {{ form.srcLibEntries }}
+                            {{ wtf.form_field(form.submit) }}
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-
-
-        
-            <div>
-                <p>
-                <div id="saveToLibButtonHiddednID">
-                    <input type="hidden" value={{original_post.id}} id="original_post_id">
-                </div>
-                <p id="SaveToLibResponse"></p>
-                <button class="btn btn-primary" id="saveToLibButton">Save Entry to Library</button>
-                </p>
+        <div>
+            <p>
+            <div id="saveToLibButtonHiddednID">
+                <input type="hidden" value={{original_post.id}} id="original_post_id">
             </div>
+            <p id="SaveToLibResponse"></p>
+            <button class="btn btn-primary" id="saveToLibButton">Save Entry to Library</button>
+            </p>
+        </div>
         <div class="container-fluid">
             <div>
                 <h3>Write Response: </h3>
@@ -68,7 +110,7 @@
                 <div class="timeline row" data-toggle="isotope">
                   <div class="col-xs-12 col-md-12 col-lg-12 item">
                     <div class="timeline-block">
-                        <div>
+                        <div id="divWriteForm" class="hide-display">
                             <form method="post" role="form" id="response_form">
                                 {{ form.hidden_tag() }}
                                 {{ wtf.form_errors(form, hiddens="only") }}
@@ -113,7 +155,6 @@
                     {% endfor %}
                     </div>
                 </div>
-
             </div>
         </div>
     {% endif %}
@@ -121,8 +162,3 @@
 
 {% endblock %}
 
-<script>
-    $(document).ready(function(){
-
-    })
-</script>

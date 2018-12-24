@@ -10,6 +10,7 @@ from wtforms import ValidationError, validators
 from models import User
 from flask_pagedown.fields import PageDownField
 from wtforms.fields.simple import HiddenField
+from flask_ckeditor import CKEditor, CKEditorField
 
 
 class PrivateMessageReply(Form):

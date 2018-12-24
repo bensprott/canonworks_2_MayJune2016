@@ -10,26 +10,26 @@
 {% endblock %}
 {% block body %}
             <div class="v-spacer1"></div>
-
                 {%  if user.banned %}
                     <div style="width: 90% !important;" class="alert alert-danger">
                       This user is banned.
                   </div>
                 {% endif %}
-            <div class="v-spacer1"></div>
           <h1>Public page of : {{user.name}}</h1>
           <p>
           <div class="container-fluid">
           
             <div class="input-group-btn">
               <a class="btn btn-primary" href="{{url_for('send_private_message_from_user_page', userID = user.id)}}"><i class="fa fa-envelope"></i> Send Private Message </a>
-
                 {% if current_user.role.name == "Administrator" or current_user.role.name == "Moderator" or current_user.role.name == "SiteOwner" %}
-                    {% if current_user.id != user.id %}
+                    {% if current_user.id != user.id and not user.banned %}
                         <a class="left-one btn btn-danger" href="{{url_for('ban_user_from_user_page', userID = user.id)}}"><i class="fa fa-times"></i> Ban User </a>
                     {% endif %}
-                {% endif %}
 
+                    {% if user.banned %}
+                        <a class="left-one btn btn-success" href="{{url_for('un_ban_user_from_user_page', userID = user.id)}}"><i class="fa fa-times"></i>UnBan User </a>
+                    {% endif %}
+                {% endif %}
 
                 {% if current_user.role.name == "Administrator" %}
                     <a class="left-one btn btn-success" href="{{url_for('make_user_mod', userID = user.id)}}"><i class="fa fa-check"></i> Make User Moderator </a>
